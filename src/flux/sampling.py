@@ -288,7 +288,7 @@ def get_lin_function(
 
 def get_schedule(
     num_steps: int,
-    image_seq_len: int,
+    image_seq_len: int = None,
     base_shift: float = 0.5,
     max_shift: float = 1.15,
     shift: bool = True,
@@ -311,9 +311,9 @@ def get_schedule(
             num_liear_steps + 1,
         )
         unit_quadratic_timesteps = torch.linspace(
-            1, 0, num_steps - num_liear_steps + 1
+            0, 1, num_steps - num_liear_steps + 1
         ) ** 2
-        quadratic_timesteps = unit_quadratic_timesteps * linear_timesteps[-1]
+        quadratic_timesteps = unit_quadratic_timesteps * (num_liear_steps/approximate_total_num_steps-1) + 1 - num_liear_steps/approximate_total_num_steps
         timesteps = torch.cat((linear_timesteps[:-1], quadratic_timesteps), dim=0)
         return timesteps.tolist()
 
