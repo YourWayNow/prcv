@@ -294,7 +294,30 @@ def get_schedule(
     shift: bool = True,
     mu: float | None = None,    ### dev only
     sigma: float | None = None,  ### dev only
+
+    ## liear-qudratic scheduling params
+    use_linear_quadratic_schedule: bool = False,
+    approximate_total_num_steps: int = 1000,
+    num_liear_steps: int = 25,
+
 ) -> list[float]:
+    
+    assert not (shift and use_linear_quadratic_schedule), \
+        "Cannot use both shift and linear-quadratic schedule!"
+    
+    if use_linear_quadratic_schedule:
+        linear_timesteps = torch.linspace(
+            1, 1 - num_liear_steps/approximate_total_num_steps,
+            num_liear_steps + 1,
+        )
+        unit_quadratic_timesteps = torch.linspace(
+            1, 0, num_steps - num_liear_steps + 1
+        ) ** 2
+        quadratic_timesteps = unit_quadratic_timesteps * linear_timesteps[-1]
+        timesteps = torch.cat((linear_timesteps[:-1], quadratic_timesteps), dim=0)
+        return timesteps.tolist()
+
+
     # extra step for zero
     timesteps = torch.linspace(1, 0, num_steps + 1)
 
